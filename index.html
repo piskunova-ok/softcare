@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOFTCARE — химчистка мягкой мебели с выездом | Калькулятор стоимости</title>
+  <meta name="description" content="SOFTCARE — профессиональная химчистка диванов, кресел и матрасов. Рассчитайте стоимость онлайн и оставьте заявку. Демонстрационный проект.">
+  <meta name="theme-color" content="#465B4D">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SOFTCARE — химчистка мягкой мебели">
+  <meta property="og:description" content="Чистая мебель — свежесть вашего дома. Онлайн-калькулятор стоимости химчистки.">
+  <meta property="og:image" content="/images/og-cover.jpg">
+  <meta property="og:locale" content="ru_RU">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к основному содержанию</a>
+
+  <header class="site-header" id="top">
+    <div class="container header__inner">
+      <a class="logo" href="#top" aria-label="SOFTCARE — на главную">
+        <svg class="logo__mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+          <path d="M6 16.5c0-4.7 3.8-8.5 8.5-8.5S23 11.8 23 16.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="4" y="16.5" width="20" height="6.5" rx="3.25" fill="none" stroke="currentColor" stroke-width="2.2"/>
+        </svg>
+        <span class="logo__text">SOFTCARE</span>
+      </a>
+
+      <nav class="nav nav--desktop" aria-label="Основная навигация">
+        <a class="nav__link" href="#calculator">Калькулятор</a>
+        <a class="nav__link" href="#advantages">Преимущества</a>
+        <a class="nav__link" href="#steps">Этапы работы</a>
+        <a class="nav__link" href="#order">Заявка</a>
+      </nav>
+
+      <a class="btn btn--primary header__cta" href="#calculator">Рассчитать стоимость</a>
+
+      <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Открыть меню">
+        <span class="burger__line"></span>
+        <span class="burger__line"></span>
+        <span class="burger__line"></span>
+      </button>
+    </div>
+
+    <nav class="nav nav--mobile" id="mobile-menu" aria-label="Мобильная навигация" hidden>
+      <a class="nav__link" href="#calculator">Калькулятор</a>
+      <a class="nav__link" href="#advantages">Преимущества</a>
+      <a class="nav__link" href="#steps">Этапы работы</a>
+      <a class="nav__link" href="#order">Заявка</a>
+      <a class="btn btn--primary nav__cta" href="#calculator">Рассчитать стоимость</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Первый экран -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="eyebrow">Химчистка мягкой мебели с выездом</p>
+          <h1 class="hero__title">Чистая мебель — свежесть вашего дома</h1>
+          <p class="hero__subtitle">
+            Аккуратно чистим диваны, кресла и матрасы специальными составами:
+            убираем пятна, запахи и пыль, не разрушая ткань и наполнители.
+            Стоимость можно узнать прямо на этой странице — без звонков.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="#calculator">Рассчитать стоимость</a>
+            <a class="btn btn--ghost btn--lg" href="#steps">Как мы работаем</a>
+          </div>
+
+          <ul class="hero__facts">
+            <li class="hero__fact">
+              <span class="hero__fact-value">3 шага</span>
+              <span class="hero__fact-label">от расчёта до чистки</span>
+            </li>
+            <li class="hero__fact">
+              <span class="hero__fact-value">1 день</span>
+              <span class="hero__fact-label">средний срок чистки</span>
+            </li>
+            <li class="hero__fact">
+              <span class="hero__fact-value">онлайн</span>
+              <span class="hero__fact-label">расчёт за 30 секунд</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="hero__media">
+          <img
+            class="hero__image"
+            src="/images/hero.webp"
+            alt="Светлая гостиная с белым диваном и мягким креслом"
+            width="960"
+            height="640"
+            fetchpriority="high"
+            decoding="async">
+          <div class="hero__badge" aria-hidden="true">
+            <span class="hero__badge-title">Без предоплаты</span>
+            <span class="hero__badge-text">Сначала считаем стоимость, потом договариваемся о времени</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Калькулятор -->
+    <section class="section section--calculator" id="calculator" aria-labelledby="calculator-title">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow">Калькулятор</p>
+          <h2 class="section__title" id="calculator-title">Рассчитайте стоимость за 30 секунд</h2>
+          <p class="section__lead">
+            Выберите мебель и количество изделий, при необходимости отметьте дополнительные услуги —
+            итог обновится сразу.
+          </p>
+        </header>
+
+        <div class="calc">
+          <div class="calc__main">
+            <div class="calc__status" id="catalog-status" role="status" aria-live="polite">
+              <span class="status__dot" aria-hidden="true"></span>
+              <span class="status__text">Загружаем каталог…</span>
+            </div>
+
+            <div class="calc__group">
+              <h3 class="calc__group-title">Мебель</h3>
+              <div class="furniture-grid" id="furniture-grid" aria-busy="true">
+                <div class="card-skeleton" aria-hidden="true"></div>
+                <div class="card-skeleton" aria-hidden="true"></div>
+                <div class="card-skeleton" aria-hidden="true"></div>
+                <div class="card-skeleton" aria-hidden="true"></div>
+              </div>
+              <p class="calc__empty" id="furniture-empty" hidden>
+                Каталог временно недоступен. Попробуйте обновить страницу.
+              </p>
+            </div>
+
+            <div class="calc__group" id="services-group" hidden>
+              <h3 class="calc__group-title">Дополнительные услуги</h3>
+              <p class="calc__hint calc__hint--lock" id="services-hint">Сначала выберите мебель, чтобы добавить дополнительные услуги</p>
+              <div class="services" id="services-list"></div>
+              <p class="calc__hint">Услуги оплачиваются за каждое выбранное изделие.</p>
+            </div>
+          </div>
+
+          <aside class="summary" aria-labelledby="summary-title">
+            <h3 class="summary__title" id="summary-title">Ваш расчёт</h3>
+
+            <div class="summary__body" id="summary-body">
+              <p class="summary__empty" id="summary-empty">
+                Отметьте мебель — стоимость появится здесь.
+              </p>
+              <ul class="summary__lines" id="summary-lines"></ul>
+            </div>
+
+            <div class="summary__totals" id="summary-totals" hidden>
+              <div class="summary__row">
+                <span>Мебель</span>
+                <span class="summary__value" id="sum-base">0 ₽</span>
+              </div>
+              <div class="summary__row" id="row-services" hidden>
+                <span>Дополнительные услуги</span>
+                <span class="summary__value" id="sum-services">0 ₽</span>
+              </div>
+              <div class="summary__row summary__row--total">
+                <span>Итого</span>
+                <span class="summary__total" id="sum-total" aria-live="polite">0 ₽</span>
+              </div>
+            </div>
+
+            <a class="btn btn--primary btn--block" href="#order" id="summary-cta" aria-disabled="true">
+              Заказать химчистку
+            </a>
+            <p class="summary__hint" id="cta-hint" role="status" hidden>Сначала выберите мебель в калькуляторе</p>
+            <p class="summary__note">Предварительный расчёт. Точную стоимость подтвердим после осмотра.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Преимущества -->
+    <section class="section section--advantages" id="advantages" aria-labelledby="advantages-title">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow">Почему SOFTCARE</p>
+          <h2 class="section__title" id="advantages-title">Деликатная чистка без лишних хлопот</h2>
+        </header>
+
+        <ul class="features">
+          <li class="feature">
+            <span class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5 10.1 10.9 5.5 9l4.6-1.4z"/>
+                <path d="M18 15l.9 2.2 2.1.8-2.1.8L18 21l-.9-2.2-2.1-.8 2.1-.8z"/>
+              </svg>
+            </span>
+            <h3 class="feature__title">Бережное воздействие</h3>
+            <p class="feature__text">Подбираем состав под ткань и наполнитель, чтобы не повредить обивку и не испортить форму изделия.</p>
+          </li>
+          <li class="feature">
+            <span class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7h16M4 12h10M4 17h7"/>
+                <circle cx="18" cy="16.5" r="3.2"/>
+              </svg>
+            </span>
+            <h3 class="feature__title">Пятна и запахи</h3>
+            <p class="feature__text">Отдельно обрабатываем сложные пятна и убираем посторонние запахи — этими работами можно дополнить базовую чистку.</p>
+          </li>
+          <li class="feature">
+            <span class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3.5" y="5" width="17" height="15" rx="3"/>
+                <path d="M8 3.5V7M16 3.5V7M3.5 10h17"/>
+              </svg>
+            </span>
+            <h3 class="feature__title">Удобное время</h3>
+            <p class="feature__text">Согласуем дату и время после заявки — подстраиваемся под ваш распорядок, а не наоборот.</p>
+          </li>
+          <li class="feature">
+            <span class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3.5l7 3v5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9v-5z"/>
+                <path d="M9 12l2.2 2.2L15.5 10"/>
+              </svg>
+            </span>
+            <h3 class="feature__title">Прозрачный расчёт</h3>
+            <p class="feature__text">Стоимость видно заранее: выбираете позиции — видите итог и детализацию до оформления заявки.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Этапы работы -->
+    <section class="section section--steps" id="steps" aria-labelledby="steps-title">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow">Этапы работы</p>
+          <h2 class="section__title" id="steps-title">Как всё происходит</h2>
+        </header>
+
+        <ol class="steps">
+          <li class="step">
+            <span class="step__num" aria-hidden="true">01</span>
+            <h3 class="step__title">Рассчитайте стоимость</h3>
+            <p class="step__text">Выберите мебель, количество и дополнительные услуги в калькуляторе выше.</p>
+          </li>
+          <li class="step">
+            <span class="step__num" aria-hidden="true">02</span>
+            <h3 class="step__title">Оставьте заявку</h3>
+            <p class="step__text">Укажите имя и телефон — расчёт автоматически подставится в форму.</p>
+          </li>
+          <li class="step">
+            <span class="step__num" aria-hidden="true">03</span>
+            <h3 class="step__title">Согласуйте время чистки</h3>
+            <p class="step__text">Свяжемся с вами, уточним детали и удобное время визита мастера.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Заявка -->
+    <section class="section section--order" id="order" aria-labelledby="order-title">
+      <div class="container order">
+        <div class="order__intro">
+          <p class="eyebrow eyebrow--light">Заявка</p>
+          <h2 class="section__title" id="order-title">Оставьте заявку на химчистку</h2>
+          <p class="section__lead section__lead--light">
+            Расчёт из калькулятора подставится автоматически. Останется оставить контакты —
+            и мы согласуем удобное время.
+          </p>
+
+          <div class="order__preview">
+            <h3 class="order__preview-title">Ваш заказ</h3>
+            <ul class="order__lines" id="order-lines">
+              <li class="order__line order__line--empty">Заказ пока не сформирован — выберите мебель в калькуляторе.</li>
+            </ul>
+            <p class="order__total" id="order-total" hidden>
+              <span>Итого</span>
+              <strong id="order-total-value">0 ₽</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="order__form-wrap">
+          <form
+            class="form"
+            id="order-form"
+            name="order"
+            method="POST"
+            action="/"
+            data-netlify="true"
+            netlify-honeypot="bot-field"
+            novalidate>
+            <input type="hidden" name="form-name" value="order">
+            <p class="form__honeypot" aria-hidden="true">
+              <label>Не заполняйте это поле: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+            </p>
+            <input type="hidden" name="calculation" id="calculation-field" value="">
+            <input type="hidden" name="order-items" id="order-items-field" value="">
+            <input type="hidden" name="order-services" id="order-services-field" value="">
+            <input type="hidden" name="order-total" id="order-total-field" value="">
+
+            <div class="field">
+              <label class="field__label" for="name">Имя <span class="field__req" aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="name" name="name" autocomplete="name"
+                     minlength="2" maxlength="50" placeholder="Как к вам обращаться"
+                     aria-describedby="name-error" required>
+              <p class="field__error" id="name-error" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="phone">Телефон <span class="field__req" aria-hidden="true">*</span></label>
+              <input class="field__input" type="tel" id="phone" name="phone" autocomplete="tel"
+                     inputmode="tel" maxlength="25" placeholder="+7 (___) ___-__-__"
+                     aria-describedby="phone-error" required>
+              <p class="field__error" id="phone-error" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="comment">Комментарий <span class="field__optional">необязательно</span></label>
+              <textarea class="field__input field__input--area" id="comment" name="comment" rows="4"
+                        maxlength="500" placeholder="Например: диван с пятном от кофе в гостиной"
+                        aria-describedby="comment-error"></textarea>
+              <p class="field__error" id="comment-error" role="alert"></p>
+            </div>
+
+            <div class="field field--checkbox">
+              <input class="field__checkbox" type="checkbox" id="consent" name="consent"
+                     aria-describedby="consent-error consent-info" required>
+              <label class="field__label field__label--checkbox" for="consent">
+                Согласен на обработку персональных данных
+              </label>
+              <p class="field__info" id="consent-info">
+                <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Как мы обрабатываем персональные данные</a>
+              </p>
+              <p class="field__error" id="consent-error" role="alert"></p>
+            </div>
+
+            <button class="btn btn--primary btn--block" type="submit" id="submit-btn">
+              Отправить заявку
+            </button>
+            <p class="form__status form__status--success" id="form-success" role="status" aria-live="polite" hidden>
+              Спасибо! Ваша заявка отправлена. Мы свяжемся с вами для уточнения деталей
+            </p>
+            <p class="form__status form__status--error" id="form-error" role="alert" hidden></p>
+            <p class="form__note" id="form-note">
+              Расчёт предварительный и не является окончательной ценой: стоимость подтвердим после осмотра.
+              Нажимая кнопку, вы соглашаетесь с <a href="/privacy.html" target="_blank" rel="noopener noreferrer">обработкой персональных данных</a>.
+            </p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a class="logo logo--footer" href="#top">
+          <span class="logo__text">SOFTCARE</span>
+        </a>
+        <p class="footer__tagline">Химчистка мягкой мебели: диваны, кресла, матрасы.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Навигация в подвале">
+        <a class="footer__link" href="#calculator">Калькулятор</a>
+        <a class="footer__link" href="#advantages">Преимущества</a>
+        <a class="footer__link" href="#steps">Этапы работы</a>
+        <a class="footer__link" href="#order">Заявка</a>
+        <a class="footer__link" href="/privacy.html">Обработка данных</a>
+      </nav>
+
+      <p class="footer__demo">
+        Демонстрационный проект для портфолио. Контактные данные и реквизиты компании не указаны.
+        Цены в калькуляторе демонстрационные.
+      </p>
+    </div>
+    <div class="container footer__bottom">
+      <span>© <span id="year">2026</span> SOFTCARE</span>
+      <span>Фото: StockSnap (CC0)</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
