@@ -19,6 +19,13 @@
 <body>
   <a class="skip-link" href="#main">Перейти к основному содержанию</a>
 
+  <div class="demo-bar" role="note">
+    <span class="demo-bar__tag">Демо</span>
+    <p class="demo-bar__text">
+      Учебный проект SOFTCARE — демонстрационный режим: заявки и введённые данные никуда не отправляются и не сохраняются.
+    </p>
+  </div>
+
   <header class="site-header" id="top">
     <div class="container header__inner">
       <a class="logo" href="#top" aria-label="SOFTCARE — на главную">
@@ -268,8 +275,8 @@
           <p class="eyebrow eyebrow--light">Заявка</p>
           <h2 class="section__title" id="order-title">Оставьте заявку на химчистку</h2>
           <p class="section__lead section__lead--light">
-            Расчёт из калькулятора подставится автоматически. Останется оставить контакты —
-            и мы согласуем удобное время.
+            Расчёт из калькулятора подставится автоматически. Заполните форму — и увидите,
+            как оформляется заявка. В учебном режиме ничего не отправляется.
           </p>
 
           <div class="order__preview">
@@ -285,27 +292,28 @@
         </div>
 
         <div class="order__form-wrap">
-          <form
+          <noscript>
+            <style>#order-form { display: none; }</style>
+            <p class="form__nojs" role="status">
+              Интерактивная демонстрация недоступна без JavaScript. Включите JavaScript,
+              чтобы собрать расчёт и посмотреть, как оформляется заявка.
+              Без JavaScript страница ничего не отправляет.
+            </p>
+          </noscript>
+
+          <div
             class="form"
             id="order-form"
-            name="order"
-            method="POST"
-            action="/thanks.html"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
-            novalidate>
-            <input type="hidden" name="form-name" value="order">
-            <p class="form__honeypot" aria-hidden="true">
-              <label>Не заполняйте это поле: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
-            </p>
-            <input type="hidden" name="calculation" id="calculation-field" value="">
-            <input type="hidden" name="order-items" id="order-items-field" value="">
-            <input type="hidden" name="order-services" id="order-services-field" value="">
-            <input type="hidden" name="order-total" id="order-total-field" value="">
+            role="form"
+            aria-labelledby="order-title">
+            <input type="hidden" id="calculation-field" value="">
+            <input type="hidden" id="order-items-field" value="">
+            <input type="hidden" id="order-services-field" value="">
+            <input type="hidden" id="order-total-field" value="">
 
             <div class="field">
               <label class="field__label" for="name">Имя <span class="field__req" aria-hidden="true">*</span></label>
-              <input class="field__input" type="text" id="name" name="name" autocomplete="name"
+              <input class="field__input" type="text" id="name" autocomplete="name"
                      minlength="2" maxlength="50" placeholder="Как к вам обращаться"
                      aria-describedby="name-error" required>
               <p class="field__error" id="name-error" role="alert"></p>
@@ -313,7 +321,7 @@
 
             <div class="field">
               <label class="field__label" for="phone">Телефон <span class="field__req" aria-hidden="true">*</span></label>
-              <input class="field__input" type="tel" id="phone" name="phone" autocomplete="tel"
+              <input class="field__input" type="tel" id="phone" autocomplete="tel"
                      inputmode="tel" maxlength="25" placeholder="+7 (___) ___-__-__"
                      aria-describedby="phone-error" required>
               <p class="field__error" id="phone-error" role="alert"></p>
@@ -321,14 +329,14 @@
 
             <div class="field">
               <label class="field__label" for="comment">Комментарий <span class="field__optional">необязательно</span></label>
-              <textarea class="field__input field__input--area" id="comment" name="comment" rows="4"
+              <textarea class="field__input field__input--area" id="comment" rows="4"
                         maxlength="500" placeholder="Например: диван с пятном от кофе в гостиной"
                         aria-describedby="comment-error"></textarea>
               <p class="field__error" id="comment-error" role="alert"></p>
             </div>
 
             <div class="field field--checkbox">
-              <input class="field__checkbox" type="checkbox" id="consent" name="consent"
+              <input class="field__checkbox" type="checkbox" id="consent"
                      aria-describedby="consent-error consent-info" required>
               <label class="field__label field__label--checkbox" for="consent">
                 Согласен на обработку персональных данных
@@ -339,18 +347,19 @@
               <p class="field__error" id="consent-error" role="alert"></p>
             </div>
 
-            <button class="btn btn--primary btn--block" type="submit" id="submit-btn">
-              Отправить заявку
+            <button class="btn btn--primary btn--block" type="button" id="submit-btn">
+              Сформировать демо-заявку
             </button>
             <p class="form__status form__status--success" id="form-success" role="status" aria-live="polite" hidden>
-              Спасибо! Ваша заявка отправлена. Мы свяжемся с вами для уточнения деталей
+              Демо-заявка сформирована. В учебном режиме данные никуда не отправляются
             </p>
             <p class="form__status form__status--error" id="form-error" role="alert" hidden></p>
             <p class="form__note" id="form-note">
-              Расчёт предварительный и не является окончательной ценой: стоимость подтвердим после осмотра.
+              Это учебный проект: форма демонстрационная, введённые данные никуда не отправляются и не сохраняются.
+              Расчёт предварительный и не является окончательной ценой.
               Нажимая кнопку, вы соглашаетесь с <a href="/privacy.html" target="_blank" rel="noopener noreferrer">обработкой персональных данных</a>.
             </p>
-          </form>
+          </div>
         </div>
       </div>
     </section>

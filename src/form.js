@@ -1,22 +1,21 @@
 /**
- * Форма заявки: проверка полей, honeypot, расчёт в скрытых полях
- * и отправка через Netlify Forms (AJAX, URL-encoded).
+ * Демонстрационный блок заявки: проверка полей и расчёт в скрытых полях.
  *
- * Успех подтверждается только попаданием на страницу подтверждения
- * thanks.html: её Netlify Forms отдаёт исключительно после сохранения
- * заявки (action формы). Локальная разработка без Forms проваливает POST
- * в статику и возвращает главную — это не успех.
+ * Режим демонстрации: разметка не является <form>, сетевые запросы не выполняются.
+ * Введённые данные не отправляются в Netlify Forms, на почту и в другие внешние
+ * сервисы, а также не сохраняются. Кнопка формирует демо-заявку только локально,
+ * посетитель видит сообщение о сформированной демо-заявке.
  */
 
 const NAME_PATTERN = /^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё' -]{1,49}$/;
 const MAX_COMMENT_LENGTH = 500;
-const SUBMIT_ENDPOINT = '/';
-const THANKS_PATH = '/thanks.html';
-const SUCCESS_MARKER = 'data-order-success';
-const SUCCESS_MESSAGE = 'Спасибо! Ваша заявка отправлена. Мы свяжемся с вами для уточнения деталей';
-const NETWORK_ERROR_MESSAGE = 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.';
-const NOT_CONNECTED_MESSAGE = 'Не удалось отправить заявку: сервис приёма заявок пока не подключён. Мы не получили ваши данные — попробуйте позже.';
-const EMPTY_ORDER_MESSAGE = 'Сначала выберите мебель в калькуляторе — заявка отправляется вместе с расчётом.';
+
+/** Сообщение после демонстрационной отправки — текст из требований проекта. */
+export const DEMO_SUCCESS_MESSAGE =
+  'Демо-заявка сформирована. В учебном режиме данные никуда не отправляются';
+
+const DEMO_DONE_LABEL = 'Демо-заявка сформирована';
+const EMPTY_ORDER_MESSAGE = 'Сначала выберите мебель в калькуляторе — демо-заявка формируется вместе с расчётом.';
 const INVALID_FIELDS_MESSAGE = 'Проверьте выделенные поля — часть данных заполнена неверно.';
 
 /** Имя: 2–50 символов, буквы, пробелы, дефис, апостроф. */
@@ -51,69 +50,29 @@ export function validateComment(value) {
   return null;
 }
 
-/**
- * Разбирает ответ сервера на отправку формы.
- * Успех — только при подтверждении сохранения заявки Netlify Forms:
- * перенаправлении на страницу thanks.html либо её содержимом в ответе.
- * Ответ 200 с HTML главной (локальная разработка) успехом не считается.
- * @param {Response} response
- * @returns {Promise<{ok: boolean, kind: 'ok'|'not-connected'|'failed', status: number}>}
- */
-export async function interpretSubmitResponse(response) {
-  const status = response.status;
-  if (!response.ok) return { ok: false, kind: 'failed', status };
-
-  // Netlify Forms перенаправляет на action формы (thanks.html) после сохранения
-  let redirectedToThanks = false;
-  try {
-    if (response.redirected && response.url) {
-      const pathname = new URL(response.url).pathname.replace(/\/$/, '');
-      redirectedToThanks = pathname === THANKS_PATH || pathname === '/thanks';
-    }
-  } catch {
-    redirectedToThanks = false;
-  }
-  if (redirectedToThanks) return { ok: true, kind: 'ok', status };
-
-  // Netlify может вернуть содержимое страницы подтверждения напрямую (200)
-  let body = '';
-  try {
-    body = await response.text();
-  } catch {
-    body = '';
-  }
-  if (body.includes(SUCCESS_MARKER)) return { ok: true, kind: 'ok', status };
-
-  // Провал в статику (локальная разработка без Forms) — заявка не сохранена
-  return { ok: false, kind: 'not-connected', status };
-}
-
 export function initOrderForm() {
-  const form = document.getElementById('order-form');
+  const root = document.getElementById('order-form');
 
-  if (!form) {
+  if (!root) {
     return { setOrder() {} };
   }
 
   const fields = [
-    { input: form.querySelector('#name'), error: form.querySelector('#name-error'), validate: validateName },
-    { input: form.querySelector('#phone'), error: form.querySelector('#phone-error'), validate: validatePhone },
-    { input: form.querySelector('#comment'), error: form.querySelector('#comment-error'), validate: validateComment },
-    { input: form.querySelector('#consent'), error: form.querySelector('#consent-error'), validate: (v) => (v ? null : 'Нужно согласие на обработку данных') },
+    { input: root.querySelector('#name'), error: root.querySelector('#name-error'), validate: validateName },
+    { input: root.querySelector('#phone'), error: root.querySelector('#phone-error'), validate: validatePhone },
+    { input: root.querySelector('#comment'), error: root.querySelector('#comment-error'), validate: validateComment },
+    { input: root.querySelector('#consent'), error: root.querySelector('#consent-error'), validate: (v) => (v ? null : 'Нужно согласие на обработку данных') },
   ];
 
-  const calculationField = form.querySelector('#calculation-field');
-  const itemsField = form.querySelector('#order-items-field');
-  const servicesField = form.querySelector('#order-services-field');
-  const totalField = form.querySelector('#order-total-field');
-  const submitBtn = form.querySelector('#submit-btn');
-  const successEl = form.querySelector('#form-success');
-  const errorEl = form.querySelector('#form-error');
-  const honeypot = form.querySelector('[name="bot-field"]');
+  const calculationField = root.querySelector('#calculation-field');
+  const itemsField = root.querySelector('#order-items-field');
+  const servicesField = root.querySelector('#order-services-field');
+  const totalField = root.querySelector('#order-total-field');
+  const submitBtn = root.querySelector('#submit-btn');
+  const successEl = root.querySelector('#form-success');
+  const errorEl = root.querySelector('#form-error');
 
-  let submitting = false;
   let sent = false;
-  const submitLabel = submitBtn ? submitBtn.textContent.trim() : 'Отправить заявку';
 
   function hideStatus() {
     if (successEl) successEl.hidden = true;
@@ -136,15 +95,10 @@ export function initOrderForm() {
       errorEl.hidden = true;
       errorEl.textContent = '';
     }
-    if (successEl) successEl.textContent = SUCCESS_MESSAGE;
-    if (successEl) successEl.hidden = false;
-  }
-
-  function setSending(sending) {
-    form.setAttribute('aria-busy', sending ? 'true' : 'false');
-    if (!submitBtn) return;
-    submitBtn.disabled = sending;
-    submitBtn.textContent = sending ? 'Отправляем…' : submitLabel;
+    if (successEl) {
+      successEl.textContent = DEMO_SUCCESS_MESSAGE;
+      successEl.hidden = false;
+    }
   }
 
   function showErrorFor(field, message) {
@@ -165,26 +119,37 @@ export function initOrderForm() {
     return !message;
   }
 
+  /** Гасит сводную ошибку, когда все поля снова корректны. */
+  function clearErrorWhenValid() {
+    if (!errorEl || errorEl.hidden) return;
+    const allValid = fields.every((field) => !field.input || field.input.getAttribute('aria-invalid') !== 'true');
+    if (allValid) {
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    }
+  }
+
+  function refreshField(field) {
+    validateField(field);
+    clearErrorWhenValid();
+  }
+
   for (const field of fields) {
     if (!field.input) continue;
 
-    field.input.addEventListener('blur', () => validateField(field));
+    field.input.addEventListener('blur', () => refreshField(field));
     field.input.addEventListener('input', () => {
-      if (field.input.getAttribute('aria-invalid') === 'true') validateField(field);
+      if (field.input.getAttribute('aria-invalid') === 'true') refreshField(field);
     });
     field.input.addEventListener('change', () => {
-      if (field.input.getAttribute('aria-invalid') === 'true') validateField(field);
+      if (field.input.getAttribute('aria-invalid') === 'true') refreshField(field);
     });
   }
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (submitting || sent) return;
+  function buildDemoRequest() {
+    if (sent) return;
 
     hideStatus();
-
-    // Honeypot: заполненное скрытое поле — признак бота, отправки нет
-    if (honeypot && honeypot.value.trim() !== '') return;
 
     const results = fields.map(validateField);
     if (results.includes(false)) {
@@ -199,42 +164,26 @@ export function initOrderForm() {
       return;
     }
 
-    submitting = true;
-    setSending(true);
-
-    try {
-      const body = new URLSearchParams(new FormData(form)).toString();
-      const response = await fetch(SUBMIT_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      });
-
-      const result = await interpretSubmitResponse(response);
-
-      if (result.ok) {
-        sent = true;
-        showSuccess();
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Заявка отправлена';
-        }
-      } else if (result.kind === 'not-connected') {
-        showError(NOT_CONNECTED_MESSAGE);
-      } else {
-        showError(NETWORK_ERROR_MESSAGE);
-      }
-    } catch {
-      showError(NETWORK_ERROR_MESSAGE);
-    } finally {
-      submitting = false;
-      form.setAttribute('aria-busy', 'false');
-      if (submitBtn && !sent) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = submitLabel;
-      }
+    // Демо-режим: страница не перезагружается, запрос на сервер не выполняется
+    sent = true;
+    showSuccess();
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = DEMO_DONE_LABEL;
     }
+  }
+
+  root.addEventListener('submit', (event) => event.preventDefault());
+
+  root.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.target.tagName !== 'INPUT') return;
+    event.preventDefault();
+    buildDemoRequest();
   });
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', () => buildDemoRequest());
+  }
 
   return {
     /** Передаёт данные расчёта в скрытые поля формы. */
