@@ -2,14 +2,17 @@
  * Форма заявки: проверка полей, honeypot, расчёт в скрытых полях
  * и отправка через Netlify Forms (AJAX, URL-encoded).
  *
- * Успешным считается только подтверждённый ответ сервера:
- * 2xx без HTML-тела или серверный редирект после приёма заявки.
- * Локально (без публикации) сервис форм не отвечает — показывается ошибка.
+ * Успех подтверждается только попаданием на страницу подтверждения
+ * thanks.html: её Netlify Forms отдаёт исключительно после сохранения
+ * заявки (action формы). Локальная разработка без Forms проваливает POST
+ * в статику и возвращает главную — это не успех.
  */
 
 const NAME_PATTERN = /^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё' -]{1,49}$/;
 const MAX_COMMENT_LENGTH = 500;
 const SUBMIT_ENDPOINT = '/';
+const THANKS_PATH = '/thanks.html';
+const SUCCESS_MARKER = 'data-order-success';
 const SUCCESS_MESSAGE = 'Спасибо! Ваша заявка отправлена. Мы свяжемся с вами для уточнения деталей';
 const NETWORK_ERROR_MESSAGE = 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.';
 const NOT_CONNECTED_MESSAGE = 'Не удалось отправить заявку: сервис приёма заявок пока не подключён. Мы не получили ваши данные — попробуйте позже.';
@@ -50,23 +53,39 @@ export function validateComment(value) {
 
 /**
  * Разбирает ответ сервера на отправку формы.
- * Успех — только при подтверждении от сервера, HTML-страница успехом не считается.
+ * Успех — только при подтверждении сохранения заявки Netlify Forms:
+ * перенаправлении на страницу thanks.html либо её содержимом в ответе.
+ * Ответ 200 с HTML главной (локальная разработка) успехом не считается.
  * @param {Response} response
  * @returns {Promise<{ok: boolean, kind: 'ok'|'not-connected'|'failed', status: number}>}
  */
 export async function interpretSubmitResponse(response) {
   const status = response.status;
-  const redirected = response.type === 'opaqueredirect';
-
-  if (redirected) return { ok: true, kind: 'ok', status };
   if (!response.ok) return { ok: false, kind: 'failed', status };
 
-  const contentType = String(response.headers.get('content-type') || '').toLowerCase();
-  if (contentType.includes('text/html')) {
-    return { ok: false, kind: 'not-connected', status };
+  // Netlify Forms перенаправляет на action формы (thanks.html) после сохранения
+  let redirectedToThanks = false;
+  try {
+    if (response.redirected && response.url) {
+      const pathname = new URL(response.url).pathname.replace(/\/$/, '');
+      redirectedToThanks = pathname === THANKS_PATH || pathname === '/thanks';
+    }
+  } catch {
+    redirectedToThanks = false;
   }
+  if (redirectedToThanks) return { ok: true, kind: 'ok', status };
 
-  return { ok: true, kind: 'ok', status };
+  // Netlify может вернуть содержимое страницы подтверждения напрямую (200)
+  let body = '';
+  try {
+    body = await response.text();
+  } catch {
+    body = '';
+  }
+  if (body.includes(SUCCESS_MARKER)) return { ok: true, kind: 'ok', status };
+
+  // Провал в статику (локальная разработка без Forms) — заявка не сохранена
+  return { ok: false, kind: 'not-connected', status };
 }
 
 export function initOrderForm() {
@@ -189,7 +208,6 @@ export function initOrderForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body,
-        redirect: 'manual',
       });
 
       const result = await interpretSubmitResponse(response);
