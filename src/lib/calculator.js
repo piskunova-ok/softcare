@@ -3,7 +3,7 @@
  *
  * Формула:
  *   база   = Σ (цена изделия × количество)
- *   услуги = Σ (цена услуги × общее количество изделий)
+ *   услуги = Σ (цена услуги × выбранное количество услуги)
  *   итого  = база + услуги
  */
 
@@ -37,7 +37,7 @@ export function clampQuantity(value, min = QTY_MIN, max = QTY_MAX) {
 /**
  * @typedef {Object} Selection
  * @property {Object<string, number>} quantities - количество по id изделия
- * @property {string[]} services - id выбранных услуг
+ * @property {Object<string, number>} serviceQuantities - количество услуги по id
  */
 
 /**
@@ -58,7 +58,7 @@ export function clampQuantity(value, min = QTY_MIN, max = QTY_MAX) {
 export function calculate(items, selection) {
   const catalog = Array.isArray(items) ? items : [];
   const quantities = (selection && selection.quantities) || {};
-  const selectedServices = Array.isArray(selection && selection.services) ? selection.services : [];
+  const serviceQuantities = (selection && selection.serviceQuantities) || {};
 
   const furniture = [];
   let itemsCount = 0;
@@ -88,15 +88,17 @@ export function calculate(items, selection) {
   if (itemsCount > 0) {
     for (const item of catalog) {
       if (!item || item.type !== 'service' || item.active === false) continue;
-      if (!selectedServices.includes(item.id)) continue;
 
-      const subtotal = item.price * itemsCount;
+      const quantity = clampQuantity(serviceQuantities[item.id], 0, itemsCount);
+      if (quantity <= 0) continue;
+
+      const subtotal = item.price * quantity;
       servicesTotal += subtotal;
       services.push({
         id: item.id,
         name: item.name,
         price: item.price,
-        quantity: itemsCount,
+        quantity,
         subtotal,
       });
     }
@@ -126,17 +128,26 @@ export function normalizeSelection(items, selection) {
 
   const source = selection || {};
   const quantities = {};
+  let itemsCount = 0;
   for (const [id, value] of Object.entries(source.quantities || {})) {
     if (!furnitureIds.has(id)) continue;
     const quantity = clampQuantity(value);
-    if (quantity > 0) quantities[id] = quantity;
+    if (quantity > 0) {
+      quantities[id] = quantity;
+      itemsCount += quantity;
+    }
   }
 
-  const services = Array.isArray(source.services)
-    ? source.services.filter((id) => serviceIds.has(id))
-    : [];
+  const serviceQuantities = {};
+  if (itemsCount > 0) {
+    for (const [id, value] of Object.entries(source.serviceQuantities || {})) {
+      if (!serviceIds.has(id)) continue;
+      const quantity = clampQuantity(value, 0, itemsCount);
+      if (quantity > 0) serviceQuantities[id] = quantity;
+    }
+  }
 
-  return { quantities, services };
+  return { quantities, serviceQuantities };
 }
 
 /**

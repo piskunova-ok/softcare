@@ -30,7 +30,7 @@ const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 const state = {
   items: [],
-  selection: { quantities: {}, services: [] },
+  selection: { quantities: {}, serviceQuantities: {} },
   source: null,
   lastFreshAt: 0,
 };
@@ -231,23 +231,11 @@ function syncCard(id) {
 --------------------------------------------------------- */
 
 function createService(item) {
-  const label = document.createElement('label');
-  label.className = 'service';
-  label.dataset.id = item.id;
+  const card = document.createElement('div');
+  card.className = 'service';
+  card.dataset.id = item.id;
 
-  const control = document.createElement('span');
-  control.className = 'service__control';
-
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.className = 'service__checkbox';
-  checkbox.name = 'services';
-  checkbox.value = item.id;
-  checkbox.checked = state.selection.services.includes(item.id);
-
-  control.append(checkbox);
-
-  const text = document.createElement('span');
+  const text = document.createElement('div');
   text.className = 'service__text';
 
   const name = document.createElement('span');
@@ -260,17 +248,50 @@ function createService(item) {
 
   text.append(name, price);
 
+  const controls = document.createElement('div');
+  controls.className = 'service__controls';
+
+  const stepper = document.createElement('div');
+  stepper.className = 'stepper stepper--compact';
+
+  const dec = document.createElement('button');
+  dec.type = 'button';
+  dec.className = 'stepper__btn';
+  dec.dataset.action = 'svc-dec';
+  dec.dataset.id = item.id;
+  dec.textContent = '−';
+  dec.setAttribute('aria-label', `Уменьшить количество услуги ${item.name}`);
+
+  const input = document.createElement('input');
+  input.className = 'stepper__input';
+  input.type = 'number';
+  input.min = String(QTY_MIN);
+  input.max = String(QTY_MAX);
+  input.step = '1';
+  input.value = '0';
+  input.inputMode = 'numeric';
+  input.dataset.role = 'service-input';
+  input.dataset.id = item.id;
+  input.setAttribute('aria-label', `Количество услуги ${item.name}`);
+
+  const inc = document.createElement('button');
+  inc.type = 'button';
+  inc.className = 'stepper__btn';
+  inc.dataset.action = 'svc-inc';
+  inc.dataset.id = item.id;
+  inc.textContent = '+';
+  inc.setAttribute('aria-label', `Увеличить количество услуги ${item.name}`);
+
+  stepper.append(dec, input, inc);
+
   const amount = document.createElement('span');
   amount.className = 'service__amount';
   amount.dataset.role = 'amount';
 
-  label.append(control, text, amount);
+  controls.append(stepper, amount);
+  card.append(text, controls);
 
-  checkbox.addEventListener('change', () => {
-    toggleService(item.id, checkbox.checked);
-  });
-
-  return label;
+  return card;
 }
 
 function renderServices() {
@@ -282,29 +303,50 @@ function renderServices() {
 
 function syncServices() {
   const result = calculate(state.items, state.selection);
-  const amountById = new Map(result.services.map((line) => [line.id, line.subtotal]));
-  const hasFurniture = result.itemsCount > 0;
+  const itemsCount = result.itemsCount;
+  const hasFurniture = itemsCount > 0;
+  const subtotalById = new Map(result.services.map((line) => [line.id, line.subtotal]));
 
   // Услуги доступны только при выбранной мебели
   if (dom.servicesHint) dom.servicesHint.hidden = hasFurniture;
 
-  for (const label of dom.servicesList.querySelectorAll('.service')) {
-    const id = label.dataset.id;
-    const checkbox = label.querySelector('.service__checkbox');
-    const amount = label.querySelector('[data-role="amount"]');
-    const checked = hasFurniture && state.selection.services.includes(id);
+  for (const card of dom.servicesList.querySelectorAll('.service')) {
+    const id = card.dataset.id;
+    const quantity = clampQuantity(state.selection.serviceQuantities[id], 0, hasFurniture ? itemsCount : 0);
+    const dec = card.querySelector('[data-action="svc-dec"]');
+    const inc = card.querySelector('[data-action="svc-inc"]');
+    const input = card.querySelector('[data-role="service-input"]');
+    const amount = card.querySelector('[data-role="amount"]');
 
-    checkbox.disabled = !hasFurniture;
-    checkbox.checked = checked;
-    label.classList.toggle('is-locked', !hasFurniture);
-    label.classList.toggle('is-checked', checked);
-    amount.textContent = checked ? formatMoney(amountById.get(id) || 0) : '';
+    if (input) {
+      input.max = String(hasFurniture ? itemsCount : QTY_MIN);
+      if (document.activeElement !== input) input.value = String(quantity);
+    }
+    if (dec) dec.disabled = quantity <= QTY_MIN;
+    if (inc) inc.disabled = !hasFurniture || quantity >= itemsCount;
+    if (amount) amount.textContent = hasFurniture ? formatMoney(subtotalById.get(id) || 0) : '';
+    card.classList.toggle('is-locked', !hasFurniture);
+    card.classList.toggle('is-checked', hasFurniture && quantity > 0);
   }
 }
 
 /* ---------------------------------------------------------
    Выбор количества
 --------------------------------------------------------- */
+
+function currentItemsCount() {
+  return calculate(state.items, state.selection).itemsCount;
+}
+
+/** Обрезает все количества услуг до текущего допустимого максимума. */
+function clampServiceQuantities() {
+  const itemsCount = currentItemsCount();
+  for (const [id, value] of Object.entries(state.selection.serviceQuantities)) {
+    const quantity = clampQuantity(value, 0, itemsCount);
+    if (quantity > 0) state.selection.serviceQuantities[id] = quantity;
+    else delete state.selection.serviceQuantities[id];
+  }
+}
 
 function setQuantity(id, value) {
   const quantity = clampQuantity(value);
@@ -315,16 +357,21 @@ function setQuantity(id, value) {
     delete state.selection.quantities[id];
   }
 
+  clampServiceQuantities();
   syncCard(id);
   syncServices();
   renderSummary();
 }
 
-function toggleService(id, checked) {
-  const services = new Set(state.selection.services);
-  if (checked) services.add(id);
-  else services.delete(id);
-  state.selection.services = Array.from(services);
+function setServiceQuantity(id, value) {
+  const itemsCount = currentItemsCount();
+  const quantity = clampQuantity(value, 0, itemsCount);
+
+  if (quantity > QTY_MIN) {
+    state.selection.serviceQuantities[id] = quantity;
+  } else {
+    delete state.selection.serviceQuantities[id];
+  }
 
   syncServices();
   renderSummary();
@@ -363,6 +410,38 @@ function bindCalculatorEvents() {
     if (!input) return;
     syncCard(input.dataset.id);
   });
+
+  dom.servicesList.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action]');
+    if (!button) return;
+
+    const { id, action } = button.dataset;
+    const current = clampQuantity(state.selection.serviceQuantities[id], 0, currentItemsCount());
+
+    if (action === 'svc-inc') setServiceQuantity(id, current + 1);
+    if (action === 'svc-dec') setServiceQuantity(id, current - 1);
+  });
+
+  dom.servicesList.addEventListener('input', (event) => {
+    const input = event.target.closest('[data-role="service-input"]');
+    if (!input) return;
+
+    const id = input.dataset.id;
+    const raw = input.value;
+
+    if (raw === '') {
+      setServiceQuantity(id, QTY_MIN);
+      return;
+    }
+
+    setServiceQuantity(id, raw);
+  });
+
+  dom.servicesList.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-role="service-input"]');
+    if (!input) return;
+    syncServices();
+  });
 }
 
 /**
@@ -389,8 +468,8 @@ function renderSummary() {
   const hasSelection = result.furniture.length > 0;
 
   // Без мебели дополнительные услуги сбрасываются и не участвуют в расчёте
-  if (!hasSelection && state.selection.services.length > 0) {
-    state.selection.services = [];
+  if (!hasSelection && Object.keys(state.selection.serviceQuantities).length > 0) {
+    state.selection.serviceQuantities = {};
     syncServices();
   }
 
