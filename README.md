@@ -270,7 +270,7 @@ npm run build   # production-сборка
 |---|---|
 | `hero.webp` | первый экран |
 | `item-sofa-two.webp` | двухместный диван |
-| `item-sofa-corner.webp` | угловой диван |
+| `item-sofa-corner-v2.webp` | угловой диван |
 | `item-armchair.webp` | кресло |
 | `item-mattress.webp` | матрас |
 | `detail-loveseat.webp`, `detail-bedding.webp` | резервные кадры |
